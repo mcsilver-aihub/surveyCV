@@ -41,7 +41,7 @@ docs = ["sphinx>=7.0", "sphinx-rtd-theme>=2.0"]
 
 [project.urls]
 Homepage = "https://github.com/mcsilver-aihub/surveyCV"
-Documentation = "https://github.com/mcsilver-aihub/surveyCV"
+Documentation = "https://mcsilver-aihub.github.io/surveyCV/"
 Repository = "https://github.com/mcsilver-aihub/surveyCV"
 Issues = "https://github.com/mcsilver-aihub/surveyCV/issues"
 

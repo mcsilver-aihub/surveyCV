@@ -49,8 +49,12 @@ Requires Python 3.9+, numpy, and scikit-learn.
 
 ## Documentation
 
-Full documentation (API reference, methodology background, and worked examples)
-is built with Sphinx and lives in [`docs/`](docs/). Build it locally with:
+Hosted documentation: **https://mcsilver-aihub.github.io/surveyCV/**
+
+The Sphinx sources (API reference, methodology background, and worked examples)
+live in [`docs/`](docs/). Every push to `main` rebuilds and publishes the site
+via GitHub Pages. A [Read the Docs](https://readthedocs.org/) configuration
+(`.readthedocs.yaml`) is also included. Build it locally with:
 
 ```bash
 pip install -e ".[docs]"
