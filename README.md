@@ -1,0 +1,133 @@
+# surveycv
+
+Design-aware cross-validation and train/test splitting for complex sample
+surveys, for scikit-learn / XGBoost / LightGBM pipelines in Python.
+
+When data comes from a stratified, clustered survey (YRBS, NSFG, NHANES, BRFSS,
+and similar), ordinary K-fold cross-validation leaks information: students from
+the same school (the primary sampling unit, or PSU) can land in both the
+training and test folds, so the model memorizes cluster-specific patterns and
+its measured performance is optimistic. `surveycv` builds folds and train/test
+splits that keep each PSU wholly on one side of the split and stay balanced
+across strata, and it scores test folds with survey weights so model selection
+targets a population-representative objective.
+
+This is a clean-room Python implementation of the methodology in:
+
+> Wieczorek, J., Guerin, C., & McMahon, T. (2022). K-fold cross-validation for
+> complex sample surveys. *Stat*, 11(1), e454. https://doi.org/10.1002/sta4.454
+
+and the companion R package
+[surveyCV](https://cran.r-project.org/package=surveyCV). It contains no code
+from that package and is released under the MIT license.
+
+## Install
+
+```bash
+pip install surveycv
+```
+
+Requires Python 3.9+, numpy, and scikit-learn.
+
+## What it gives you
+
+| Function / class | Purpose |
+| --- | --- |
+| `design_aware_folds(strata, clusters, n_folds, random_state)` | Per-row integer fold ids that respect the design. |
+| `SurveyFold(n_splits, strata, clusters, random_state)` | A scikit-learn cross-validator; drops into `GridSearchCV`, `cross_val_score`, or an Optuna objective. |
+| `survey_train_test_split(strata, clusters, test_size, random_state)` | A single held-out split by whole clusters, stratum-balanced. |
+| `cross_val_score_survey(estimator, X, y, cv, weights, scoring)` | Design-aware CV that scores each test fold with its survey weights. |
+
+Clusters are always treated as nested within strata, which is correct for any
+properly nested survey design (a PSU belongs to exactly one stratum).
+
+## Quick start
+
+```python
+import numpy as np
+from surveycv import survey_train_test_split, SurveyFold, cross_val_score_survey
+from xgboost import XGBClassifier
+
+# strata, psu, weight come straight from the survey file (e.g. YRBS columns
+# `stratum`, `PSU`, `weight`); X and y are your features and outcome.
+
+# 1. Primary train/test split that never puts a school in both sides.
+train_idx, test_idx = survey_train_test_split(
+    strata=stratum, clusters=psu, test_size=0.2, random_state=42
+)
+X_train, X_test = X.iloc[train_idx], X.iloc[test_idx]
+y_train, y_test = y.iloc[train_idx], y.iloc[test_idx]
+
+# 2. Design-aware, survey-weighted cross-validation for tuning.
+cv = SurveyFold(
+    n_splits=5,
+    strata=stratum[train_idx],
+    clusters=psu[train_idx],
+    random_state=42,
+)
+scores = cross_val_score_survey(
+    XGBClassifier(eval_metric="logloss"),
+    X_train, y_train,
+    cv=cv,
+    weights=weight[train_idx],
+    scoring="roc_auc",
+)
+print(scores.mean())
+```
+
+### Use as a scikit-learn `cv` object
+
+`SurveyFold` follows the scikit-learn cross-validator API, so it works anywhere
+a `cv` is accepted:
+
+```python
+from sklearn.model_selection import GridSearchCV
+
+cv = SurveyFold(n_splits=5, strata=stratum, clusters=psu, random_state=0)
+search = GridSearchCV(estimator, param_grid, cv=cv)
+search.fit(X, y)
+```
+
+The stratum and cluster arrays are fixed at construction and must be
+positionally aligned with the `X` you later pass to `split` / `fit`.
+
+### Optuna objective
+
+```python
+import optuna
+from surveycv import SurveyFold, cross_val_score_survey
+
+cv = SurveyFold(n_splits=5, strata=stratum, clusters=psu, random_state=0)
+
+def objective(trial):
+    params = {
+        "max_depth": trial.suggest_int("max_depth", 2, 8),
+        "learning_rate": trial.suggest_float("learning_rate", 1e-3, 0.3, log=True),
+    }
+    scores = cross_val_score_survey(
+        XGBClassifier(**params, eval_metric="logloss"),
+        X, y, cv=cv, weights=weight, scoring="roc_auc",
+    )
+    return scores.mean()
+
+study = optuna.create_study(direction="maximize")
+study.optimize(objective, n_trials=50)
+```
+
+## Fold-feasibility constraint
+
+A design supports at most as many folds as the smallest stratum has PSUs. If you
+request more folds than that, `surveycv` warns and tells you the largest
+feasible fold count (the Wieczorek NSFG example was limited to 4-fold CV for
+exactly this reason). Check your smallest stratum's PSU count before fixing
+`n_folds`.
+
+## Supported scoring names
+
+`cross_val_score_survey` currently supports `roc_auc`, `accuracy`, and
+`neg_mean_squared_error`, each computed with survey weights. Higher is always
+better, matching scikit-learn's scorer convention.
+
+## License
+
+MIT. Please cite Wieczorek et al. (2022) when you use the methodology.
