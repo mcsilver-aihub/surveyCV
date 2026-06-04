@@ -57,10 +57,8 @@ def _holdout_count(n_clusters: int, test_size: float) -> int:
     """
     if n_clusters < 2:
         return 0
-    n_test = int(round(test_size * n_clusters))
-    n_test = max(1, n_test)
-    n_test = min(n_clusters - 1, n_test)
-    return n_test
+    n_test = max(1, int(round(test_size * n_clusters)))
+    return min(n_clusters - 1, n_test)
 
 
 def survey_train_test_split(

@@ -48,6 +48,7 @@ class SurveyFold:
         clusters: object = None,
         random_state: int | None = None,
     ) -> None:
+        """Store the design labels and fold settings; see the class docstring."""
         self.n_splits = n_splits
         self.strata = strata
         self.clusters = clusters
