@@ -1,7 +1,7 @@
 API Reference
 =============
 
-All four public objects are importable directly from the top-level package:
+All public objects are importable directly from the top-level package:
 
 .. code-block:: python
 
@@ -10,6 +10,8 @@ All four public objects are importable directly from the top-level package:
        SurveyFold,
        survey_train_test_split,
        cross_val_score_survey,
+       cluster_bootstrap_ci,
+       ClusterBootstrapResult,
    )
 
 .. currentmodule:: surveycv
@@ -35,3 +37,11 @@ Weighted scoring
 ----------------
 
 .. autofunction:: cross_val_score_survey
+
+Confidence intervals
+--------------------
+
+.. autofunction:: cluster_bootstrap_ci
+
+.. autoclass:: ClusterBootstrapResult
+   :no-members:

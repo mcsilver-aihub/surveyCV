@@ -77,12 +77,35 @@ The package maps each rule onto a small, composable piece of API.
      - :func:`~surveycv.survey_train_test_split`
    * - Survey-weighted cross-validation scoring
      - :func:`~surveycv.cross_val_score_survey`
+   * - Cluster bootstrap for confidence intervals
+     - :func:`~surveycv.cluster_bootstrap_ci`
 
 Fold construction partitions the unique PSUs within each stratum across the
 folds, then assigns every row to its PSU's fold, which enforces rules 1-3
 simultaneously. Scoring passes the held-out rows' survey weights to the metric,
 which enforces rule 4. The feasibility constraint is surfaced as a warning when a
 stratum has fewer PSUs than the requested fold count.
+
+Folds versus the bootstrap
+--------------------------
+
+Cross-validation and confidence intervals are different problems, and this
+package keeps them separate.
+
+A *fold* is a partition without replacement: :func:`~surveycv.design_aware_folds`
+cuts the data into K disjoint groups so each PSU sits in exactly one fold and
+every row appears exactly once. That is what model selection needs, because each
+fold takes a turn as the held-out evaluation set.
+
+The *cluster bootstrap* (:func:`~surveycv.cluster_bootstrap_ci`) resamples whole
+PSUs with replacement, independently within each stratum, and recomputes the
+statistic on each resample to build a sampling distribution. A PSU can appear
+zero, one, or several times in a given resample. That resampling with
+replacement is exactly what produces the variance estimate behind a confidence
+interval (Wolter 2007). Using fold partitions in place of the bootstrap, or
+nesting a bootstrap inside folds, does not give a valid design-based variance
+estimate; use the cluster bootstrap for intervals and the folds for
+cross-validation.
 
 Relationship to the surveyCV R package
 --------------------------------------

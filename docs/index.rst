@@ -47,9 +47,16 @@ What it gives you
      - A single held-out split by whole clusters, stratum-balanced.
    * - :func:`~surveycv.cross_val_score_survey`
      - Design-aware CV that scores each test fold with its survey weights.
+   * - :func:`~surveycv.cluster_bootstrap_ci`
+     - Confidence intervals by resampling whole PSUs with replacement within strata.
 
 Clusters are always treated as nested within strata, which is correct for any
 properly nested survey design (a PSU belongs to exactly one stratum).
+
+Folds and the bootstrap do different jobs: :func:`~surveycv.design_aware_folds`
+and :class:`~surveycv.SurveyFold` *partition* the data for cross-validation,
+while :func:`~surveycv.cluster_bootstrap_ci` *resamples* it with replacement for
+variance estimation. They are not interchangeable.
 
 Indices and tables
 ------------------

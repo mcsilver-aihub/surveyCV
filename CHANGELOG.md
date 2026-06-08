@@ -4,6 +4,16 @@ All notable changes to this project are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/), and the project aims to follow
 semantic versioning.
 
+## [0.2.0] - 2026-06-08
+
+### Added
+- `cluster_bootstrap_ci`: confidence intervals for an arbitrary survey statistic
+  by resampling whole PSUs with replacement within strata. Returns a
+  `ClusterBootstrapResult` (estimate, percentile bounds, bootstrap standard
+  error, finite-resample count, alpha). Warns on single-PSU strata and drops
+  non-finite resamples (e.g. degenerate draws on a rare outcome).
+- `ClusterBootstrapResult`: named-tuple result type for `cluster_bootstrap_ci`.
+
 ## [0.1.0] - 2026-06-04
 
 ### Added

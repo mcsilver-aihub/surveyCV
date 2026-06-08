@@ -106,3 +106,33 @@ Supported scoring names
 :func:`~surveycv.cross_val_score_survey` supports ``roc_auc``, ``accuracy``, and
 ``neg_mean_squared_error``, each computed with survey weights. Higher is always
 better, matching scikit-learn's scorer convention.
+
+Confidence intervals with the cluster bootstrap
+-----------------------------------------------
+
+For a confidence interval on a survey statistic (weighted prevalence, weighted
+AUC, sensitivity, ...), resample whole PSUs with replacement within strata. Pass
+a ``statistic(row_indices) -> float`` that computes your quantity on the rows
+selected by the given positional indices:
+
+.. code-block:: python
+
+   import numpy as np
+   from sklearn.metrics import roc_auc_score
+   from surveycv import cluster_bootstrap_ci
+
+   # y, proba, weight, stratum, psu are arrays aligned to the evaluation set.
+   def weighted_auc(idx):
+       return roc_auc_score(y[idx], proba[idx], sample_weight=weight[idx])
+
+   result = cluster_bootstrap_ci(
+       weighted_auc, clusters=psu, strata=stratum, n_boot=2000, random_state=0,
+   )
+   print(f"AUC {result.estimate:.3f} "
+         f"(95% CI {result.ci_low:.3f}-{result.ci_high:.3f})")
+
+The statistic should return ``nan`` for a degenerate resample (for example one
+with a single outcome class on a rare outcome); such resamples are dropped from
+the percentile computation and the surviving count is reported in
+``result.n_boot``. Use the cluster bootstrap for confidence intervals, not the
+cross-validation folds.
