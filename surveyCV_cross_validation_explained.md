@@ -72,6 +72,6 @@ limit the original paper hit on the NSFG data.
 - `cross_val_score_survey(..., weights=...)`: runs the train and score loop and
   applies the survey weights when grading each fold.
 
-In one sentence: it builds folds by dealing out whole schools within each stratum
+Summary: it builds folds by dealing out whole schools within each stratum
 so no school is split and every fold mirrors the survey, then grades each fold
 using the survey weights.
