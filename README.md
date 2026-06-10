@@ -70,6 +70,7 @@ sphinx-build -b html docs docs/_build/html
 | `survey_train_test_split(strata, clusters, test_size, random_state)` | A single held-out split by whole clusters, stratum-balanced. |
 | `cross_val_score_survey(estimator, X, y, cv, weights, scoring)` | Design-aware CV that scores each test fold with its survey weights. |
 | `cluster_bootstrap_ci(statistic, clusters, strata, n_boot, alpha)` | Confidence intervals by resampling whole PSUs with replacement within strata. |
+| `weighted_prevalence`, `weighted_sensitivity`, `weighted_specificity`, `weighted_auc`, `weighted_mean` | Survey-weighted metrics that drop into `cluster_bootstrap_ci` as the statistic. |
 
 Clusters are always treated as nested within strata, which is correct for any
 properly nested survey design (a PSU belongs to exactly one stratum).
@@ -179,6 +180,33 @@ The statistic should return `nan` for a degenerate resample (for example one
 with a single outcome class on a rare outcome); those resamples are dropped from
 the percentile computation and reported in `result.n_boot`. Use the cluster
 bootstrap for confidence intervals, not the cross-validation folds.
+
+## Survey-weighted metrics
+
+The package ships the common weighted statistics so you do not have to hand-roll
+them. Each takes full arrays and is written to drop straight into
+`cluster_bootstrap_ci` as the statistic:
+
+```python
+from surveycv import (
+    weighted_prevalence, weighted_sensitivity, weighted_specificity,
+    weighted_auc, cluster_bootstrap_ci,
+)
+
+pred = (proba >= threshold).astype(int)   # binary flag for sensitivity/specificity
+
+prev = cluster_bootstrap_ci(lambda i: weighted_prevalence(y[i], w[i]),
+                            clusters=psu, strata=stratum)
+sens = cluster_bootstrap_ci(lambda i: weighted_sensitivity(y[i], pred[i], w[i]),
+                            clusters=psu, strata=stratum)
+auc  = cluster_bootstrap_ci(lambda i: weighted_auc(y[i], proba[i], w[i]),
+                            clusters=psu, strata=stratum)
+```
+
+Each metric returns `nan` when it is undefined on the given rows (a resample with
+no positive cases, a single outcome class, or zero total weight), which is exactly
+what the bootstrap expects, so a few degenerate resamples on a rare outcome do not
+break the interval.
 
 ## Fold-feasibility constraint
 

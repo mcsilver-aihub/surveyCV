@@ -49,6 +49,8 @@ What it gives you
      - Design-aware CV that scores each test fold with its survey weights.
    * - :func:`~surveycv.cluster_bootstrap_ci`
      - Confidence intervals by resampling whole PSUs with replacement within strata.
+   * - ``weighted_prevalence`` / ``weighted_sensitivity`` / ``weighted_specificity`` / ``weighted_auc``
+     - Survey-weighted metrics that drop into ``cluster_bootstrap_ci`` as the statistic.
 
 Clusters are always treated as nested within strata, which is correct for any
 properly nested survey design (a PSU belongs to exactly one stratum).

@@ -13,12 +13,21 @@ Public API:
     survey_train_test_split: a single held-out split by whole clusters.
     cross_val_score_survey: design-aware, survey-weighted cross-validation.
     cluster_bootstrap_ci: confidence intervals by resampling PSUs within strata.
+    weighted_prevalence, weighted_sensitivity, weighted_specificity,
+    weighted_auc, weighted_mean: survey-weighted metrics for the bootstrap.
 """
 
 from __future__ import annotations
 
 from .bootstrap import ClusterBootstrapResult, cluster_bootstrap_ci
 from .folds import design_aware_folds
+from .metrics import (
+    weighted_auc,
+    weighted_mean,
+    weighted_prevalence,
+    weighted_sensitivity,
+    weighted_specificity,
+)
 from .scoring import cross_val_score_survey
 from .split import survey_train_test_split
 from .splitter import SurveyFold
@@ -30,6 +39,11 @@ __all__ = [
     "cross_val_score_survey",
     "cluster_bootstrap_ci",
     "ClusterBootstrapResult",
+    "weighted_prevalence",
+    "weighted_sensitivity",
+    "weighted_specificity",
+    "weighted_auc",
+    "weighted_mean",
 ]
 
-__version__ = "0.2.0"
+__version__ = "0.3.0"

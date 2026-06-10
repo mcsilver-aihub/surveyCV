@@ -12,6 +12,11 @@ All public objects are importable directly from the top-level package:
        cross_val_score_survey,
        cluster_bootstrap_ci,
        ClusterBootstrapResult,
+       weighted_prevalence,
+       weighted_sensitivity,
+       weighted_specificity,
+       weighted_auc,
+       weighted_mean,
    )
 
 .. currentmodule:: surveycv
@@ -45,3 +50,16 @@ Confidence intervals
 
 .. autoclass:: ClusterBootstrapResult
    :no-members:
+
+Survey-weighted metrics
+-----------------------
+
+.. autofunction:: weighted_prevalence
+
+.. autofunction:: weighted_sensitivity
+
+.. autofunction:: weighted_specificity
+
+.. autofunction:: weighted_auc
+
+.. autofunction:: weighted_mean

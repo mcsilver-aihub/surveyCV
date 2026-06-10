@@ -4,6 +4,15 @@ All notable changes to this project are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/), and the project aims to follow
 semantic versioning.
 
+## [0.3.0] - 2026-06-10
+
+### Added
+- Survey-weighted metrics: `weighted_prevalence`, `weighted_sensitivity`,
+  `weighted_specificity`, `weighted_auc`, and the general `weighted_mean`. They
+  take full arrays and drop into `cluster_bootstrap_ci` as the statistic. Each
+  returns `nan` when undefined (no positives, single class, or zero total
+  weight) so it composes cleanly with the cluster bootstrap on rare outcomes.
+
 ## [0.2.0] - 2026-06-08
 
 ### Added
