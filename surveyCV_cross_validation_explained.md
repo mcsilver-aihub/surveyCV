@@ -75,8 +75,7 @@ The folds above are for picking a model. Once you have a model and a number you
 care about (a weighted AUC, a weighted prevalence, a per-group sensitivity), you
 still need a confidence interval around it, and that interval has to respect the
 same school structure. The tool for that is a cluster bootstrap. It now ships as
-`cluster_bootstrap_ci`, which is the library version of the hand-rolled
-psu_within_strata_bootstrap from the workflow.
+`cluster_bootstrap_ci`.
 
 The idea is the mirror image of the folds. Instead of dealing each school to one
 fold, you build many pretend datasets by drawing whole schools at random, with
