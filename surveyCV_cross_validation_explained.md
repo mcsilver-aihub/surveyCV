@@ -3,8 +3,8 @@
 This covers two jobs. First, how the folds for cross-validation are built from the
 survey design. Second, how the cluster bootstrap puts a confidence interval on a
 number once you have a model. They are different tools for different jobs, and the
-last sections walk through the bootstrap (the `cluster_bootstrap_ci` function that
-replaced the hand-rolled bootstrap in the workflow) and how it handles messy data.
+last sections walk through the bootstrap (the `cluster_bootstrap_ci` function) and
+how it handles messy data.
 
 ## The core idea
 
