@@ -107,7 +107,7 @@ PSU and stratum labels. It returns the estimate, the interval, and the bootstrap
 standard error.
 
 ```python
-from research_pipeline import cluster_bootstrap_ci
+from surveycv import cluster_bootstrap_ci
 from sklearn.metrics import roc_auc_score
 
 # y_eval, proba_eval, w_eval, stratum_eval, psu_eval are aligned arrays
