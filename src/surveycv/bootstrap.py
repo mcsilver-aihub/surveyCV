@@ -198,8 +198,10 @@ def cluster_bootstrap_ci(
         e.g. ``lambda idx: metric(group_a in idx) - metric(group_b in idx)``, and
         read significance from whether the resulting interval excludes 0. Do not
         bootstrap each group separately and subtract the two distributions: when
-        groups share PSUs (as race groups do within a school) the draws are not
-        independent, so that understates the variance of the difference.
+        groups share PSUs (as race groups do within a school) the two group
+        statistics are correlated, and subtracting independent draws ignores that
+        covariance. With the positive correlation that shared schools induce, the
+        gap interval then comes out too wide, so a real difference can be missed.
     """
     if not callable(statistic):
         raise TypeError("statistic must be callable: statistic(row_indices) -> float.")

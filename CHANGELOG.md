@@ -4,6 +4,15 @@ All notable changes to this project are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/), and the project aims to follow
 semantic versioning.
 
+## [0.4.1] - 2026-06-11
+
+### Fixed
+- Corrected the two-group caveat wording for `cluster_bootstrap_ci`. Subtracting
+  two independently-bootstrapped group distributions ignores the covariance from
+  shared PSUs and makes the gap interval too *wide* (not too narrow, as the
+  earlier text said), so a real difference can be missed. Use the
+  difference-as-statistic pattern on the same resample.
+
 ## [0.4.0] - 2026-06-11
 
 ### Added

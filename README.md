@@ -211,8 +211,10 @@ res = cluster_bootstrap_ci(gap, clusters=psu, strata=stratum, n_boot=2000)
 ```
 
 Do not bootstrap each group separately and subtract the two distributions: when
-groups share PSUs (race groups within a school) the draws are not independent, so
-that understates the variance of the gap.
+groups share PSUs (race groups within a school) the two group statistics are
+correlated, and subtracting independent draws ignores that covariance. With the
+positive correlation shared schools induce, the gap interval comes out too wide,
+so a real difference can be missed.
 
 ## Survey-weighted metrics
 
