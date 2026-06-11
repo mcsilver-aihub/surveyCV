@@ -45,6 +45,10 @@ class ClusterBootstrapResult(NamedTuple):
         n_boot: Number of bootstrap resamples used (excludes any that produced a
             non-finite statistic).
         alpha: Two-sided significance level used for the interval.
+        bootstrap_distribution: The 1-D array of finite resample statistics
+            (length ``n_boot``) that the interval was read from. Useful for
+            plotting the distribution, computing a bootstrap p-value, or building
+            a different interval type without re-running the resampling.
     """
 
     estimate: float
@@ -53,6 +57,7 @@ class ClusterBootstrapResult(NamedTuple):
     standard_error: float
     n_boot: int
     alpha: float
+    bootstrap_distribution: np.ndarray
 
 
 def _validate_alpha(alpha: float) -> None:
@@ -171,7 +176,9 @@ def cluster_bootstrap_ci(
     Returns:
         A :class:`ClusterBootstrapResult` with the point estimate, percentile
         confidence bounds, bootstrap standard error, the number of finite
-        resamples used, and ``alpha``.
+        resamples used, ``alpha``, and ``bootstrap_distribution`` (the array of
+        finite resample statistics, for plotting, a bootstrap p-value, or a
+        custom interval).
 
     Raises:
         TypeError: If ``statistic`` is not callable.
@@ -184,6 +191,15 @@ def cluster_bootstrap_ci(
         trigger a warning. Resamples whose statistic is non-finite are dropped
         from the percentile computation (with a warning) so a few degenerate
         draws on a rare outcome do not invalidate the whole interval.
+
+    Note:
+        To compare two groups (for example a Black-vs-White sensitivity gap),
+        make ``statistic`` return the difference computed on the *same* resample,
+        e.g. ``lambda idx: metric(group_a in idx) - metric(group_b in idx)``, and
+        read significance from whether the resulting interval excludes 0. Do not
+        bootstrap each group separately and subtract the two distributions: when
+        groups share PSUs (as race groups do within a school) the draws are not
+        independent, so that understates the variance of the difference.
     """
     if not callable(statistic):
         raise TypeError("statistic must be callable: statistic(row_indices) -> float.")
@@ -239,4 +255,5 @@ def cluster_bootstrap_ci(
         standard_error=standard_error,
         n_boot=n_finite,
         alpha=alpha,
+        bootstrap_distribution=boot[finite],
     )

@@ -169,3 +169,56 @@ def test_mismatched_lengths_raise():
     """Strata and clusters of differing length are rejected."""
     with pytest.raises(ValueError, match="length"):
         cluster_bootstrap_ci(lambda idx: 0.0, clusters=np.array([0, 1, 2]), strata=np.array([0, 1]))
+
+
+def test_bootstrap_distribution_returned_and_consistent():
+    """The raw resample values are returned and match the reported summary."""
+    strata, clusters, y, w = _design()
+
+    def weighted_prev(idx):
+        return float(np.average(y[idx], weights=w[idx]))
+
+    r = cluster_bootstrap_ci(
+        weighted_prev, clusters=clusters, strata=strata, n_boot=500, random_state=3
+    )
+    dist = r.bootstrap_distribution
+    assert isinstance(dist, np.ndarray)
+    assert dist.shape == (r.n_boot,)
+    assert np.all(np.isfinite(dist))
+    # The reported CI bounds are the percentiles of the returned distribution.
+    assert r.ci_low == pytest.approx(np.percentile(dist, 2.5))
+    assert r.ci_high == pytest.approx(np.percentile(dist, 97.5))
+    # And the standard error is the (ddof=1) std of the distribution.
+    assert r.standard_error == pytest.approx(np.std(dist, ddof=1))
+
+
+def test_distribution_excludes_non_finite_resamples():
+    """Non-finite resamples are not present in the returned distribution."""
+    strata, clusters, y, _ = _design(n_strata=3, psus=4, rows=8)
+    calls = {"n": 0}
+
+    def flaky(idx):
+        calls["n"] += 1
+        return float("nan") if calls["n"] % 4 == 0 else float(y[idx].mean())
+
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore")
+        r = cluster_bootstrap_ci(flaky, clusters=clusters, strata=strata, n_boot=40, random_state=0)
+    assert len(r.bootstrap_distribution) == r.n_boot
+    assert np.all(np.isfinite(r.bootstrap_distribution))
+
+
+def test_distribution_supports_bootstrap_pvalue():
+    """The raw values enable a one-sample bootstrap p-value (share at/over 0.5)."""
+    strata, clusters, y, w = _design()
+
+    def weighted_prev(idx):
+        return float(np.average(y[idx], weights=w[idx]))
+
+    r = cluster_bootstrap_ci(
+        weighted_prev, clusters=clusters, strata=strata, n_boot=500, random_state=1
+    )
+    # Prevalence is well below 0.5 here, so essentially no resample reaches it.
+    share_ge_half = float(np.mean(r.bootstrap_distribution >= 0.5))
+    assert 0.0 <= share_ge_half <= 1.0
+    assert share_ge_half < 0.05

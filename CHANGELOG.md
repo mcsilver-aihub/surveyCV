@@ -4,6 +4,15 @@ All notable changes to this project are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/), and the project aims to follow
 semantic versioning.
 
+## [0.4.0] - 2026-06-11
+
+### Added
+- `ClusterBootstrapResult.bootstrap_distribution`: the array of finite resample
+  statistics the interval was read from, returned by `cluster_bootstrap_ci` for
+  plotting, bootstrap p-values, or custom intervals without re-running. The
+  docstring documents the difference-as-statistic pattern for comparing two
+  groups that share PSUs.
+
 ## [0.3.0] - 2026-06-10
 
 ### Added

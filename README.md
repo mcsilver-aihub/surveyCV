@@ -181,6 +181,39 @@ with a single outcome class on a rare outcome); those resamples are dropped from
 the percentile computation and reported in `result.n_boot`. Use the cluster
 bootstrap for confidence intervals, not the cross-validation folds.
 
+### The raw bootstrap distribution
+
+`result.bootstrap_distribution` is the array of resample statistics the interval
+was read from, for plotting or a bootstrap p-value without re-running:
+
+```python
+import matplotlib.pyplot as plt
+
+dist = result.bootstrap_distribution
+plt.hist(dist, bins=40)                       # see the shape, not just the bounds
+
+p = (dist <= 0.5).mean()                       # one-sample bootstrap p-value (AUC > 0.5)
+```
+
+To compare two groups (a Black-vs-White sensitivity gap, say), make the statistic
+the difference computed on the **same** resample, then check whether the interval
+excludes 0:
+
+```python
+def gap(idx):
+    a = idx[group[idx] == "Black"]
+    b = idx[group[idx] == "White"]
+    return weighted_sensitivity(y[a], pred[a], weight[a]) - \
+           weighted_sensitivity(y[b], pred[b], weight[b])
+
+res = cluster_bootstrap_ci(gap, clusters=psu, strata=stratum, n_boot=2000)
+# significant at alpha if res.ci_low and res.ci_high are both on the same side of 0
+```
+
+Do not bootstrap each group separately and subtract the two distributions: when
+groups share PSUs (race groups within a school) the draws are not independent, so
+that understates the variance of the gap.
+
 ## Survey-weighted metrics
 
 The package ships the common weighted statistics so you do not have to hand-roll
